@@ -1,5 +1,4 @@
 public class Tools {
-
 	public static int getRoundedInt(Double from) {
 		//Long rnd = Math.round(from);
 		//return Math.toIntExact(rnd);

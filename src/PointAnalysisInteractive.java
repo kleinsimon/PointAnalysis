@@ -7,28 +7,17 @@
 //      Date:           24.11.2015
 //      Comment:		Buildfile taken from Patrick Pirrotte       
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.Hashtable;
-
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.GenericDialog;
-import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 
 public class PointAnalysisInteractive implements PlugInFilter {
 	private Double pointsX = 20.d;
-	private Double offsetX = 10.d;
-
 	private Double pointsY = 20.d;
-	private Double offsetY = 10.d;
-
 	private Double numDomains = 2.0;
 	private String overlayColor;
 	private int markLength = 5;
@@ -105,8 +94,6 @@ public class PointAnalysisInteractive implements PlugInFilter {
 
 		int px = pointsX.intValue();
 		int py = pointsY.intValue();
-		int ox = offsetX.intValue();
-		int oy = offsetY.intValue();
 		int nd = numDomains.intValue();
 
 		PointAnalysisInteractiveMenuStrip menuStrip = new PointAnalysisInteractiveMenuStrip(px, py, overlayColor, nd, randomizePoints, 

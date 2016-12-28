@@ -1,22 +1,15 @@
 import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Point;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.Map.Entry;
 
 import ij.ImagePlus;
-import ij.Prefs;
-import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
 import ij.gui.ImageRoi;
 import ij.gui.Overlay;
-import ij.measure.Calibration;
 import ij.measure.ResultsTable;
-import ij.process.Blitter;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
@@ -98,7 +91,7 @@ public class PointAnalysisInteractiveHandler {
 			points = new ArrayList<Point>(n);
 			
 			for (int i=0; i<n; i++){
-				Point p = new Point(rndInt(ox, sx-ox), rndInt(oy,sy-oy));
+				Point p = new Point(rndInt(0, sx), rndInt(0,sy));
 				points.add(p);
 				markList.put(p, 0);
 			}
@@ -150,7 +143,7 @@ public class PointAnalysisInteractiveHandler {
 		rt.setValue("Image", row, iplus.getTitle());
 
 		for (int ri = 0; ri < nd; ri++) {
-			String cName = String.format("Domain %n", ri);
+			String cName = String.format("Domain %d", ri);
 			rt.setValue(cName, row, domains[ri]);
 		}
 
@@ -224,6 +217,46 @@ public class PointAnalysisInteractiveHandler {
 		// icanv.setCursor(Cursor.CURSOR_NONE);
 		iplus.draw();
 	}
+	
+	public void applyThreshold(int mode, int threshold) {
+		int[] c = new int[3];
+		for (Point p : points) {
+			Boolean over = false;
+			c = ip.getPixel(p.x, p.y, c);
+			if (ip.isBinary() || ip.isGrayscale()) 
+				over = checkThreshold(c[0], threshold);
+			else if (ip.isColorLut())
+				over = checkThreshold(c[0], c[1], c[2], threshold, mode);
+			markList.put(p, (over) ? 1 : 0);
+		}
+		drawOverlay();
+		menuStrip.updateCounter(getMarkCounts());
+	}
+	
+	public Boolean checkThreshold(int r, int g, int b, int threshold, int mode) {
+		float[] hsbvals = java.awt.Color.RGBtoHSB(r, g, b, null);
+		
+		switch(mode) {
+			case 0:
+				return hsbvals[0] >= threshold;
+			case 1:
+				return hsbvals[1] >= threshold ;
+			case 2:
+				return hsbvals[2] >= threshold ;
+		}
+		
+		return false;
+	}
+	public Boolean checkThreshold(java.awt.Color color, int threshold, int mode) {
+		int b = color.getBlue();
+		int r = color.getRed();
+		int g = color.getGreen();
+		return checkThreshold(r, g, b, threshold, mode);
+	}
+	
+	public Boolean checkThreshold(int value, int threshold) {
+		return value >= threshold;
+	}
 
 	public Point getNextPoint(Point Cursor) {
 		if (Cursor == null)
@@ -233,9 +266,7 @@ public class PointAnalysisInteractiveHandler {
 		double dst = Double.POSITIVE_INFINITY;
 		Point nearest = null;
 		
-		Enumeration<Point> e = markList.keys();
-		while (e.hasMoreElements()) {
-			Point p = e.nextElement();
+		for (Point p : points) {
 			double d = Point.distance(p.x, p.y, Cursor.x, Cursor.y);
 			if (d<dst){
 				dst = d;

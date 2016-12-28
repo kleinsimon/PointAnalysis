@@ -5,20 +5,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import ij.ImagePlus;
 import ij.gui.YesNoCancelDialog;
 import ij.measure.ResultsTable;
 
 public class PointAnalysisInteractiveMenuStrip extends Panel implements ActionListener, ItemListener {
 	private static final long serialVersionUID = 1L;
-	private Label infoLabel, countLabel;
-	private Button okButton, cancelButton, clearButton;
-	private java.awt.Choice colorSelect;
+	private Label countLabel;
+	private Button okButton, cancelButton, clearButton, thButton;
+	private java.awt.Choice colorSelect, thSelect;
+	private java.awt.TextField thValue;
+	//private JSlider thSlider;
 	public PointAnalysisInteractiveHandler interactionHandler;
 	private String[] colorList = {"Red","Green","Blue","Yellow","Orange","Purple","Black","White"};
 
@@ -36,6 +33,24 @@ public class PointAnalysisInteractiveMenuStrip extends Panel implements ActionLi
 			colorSelect.add(c);
 		colorSelect.select(overlayColor);
 		colorSelect.addItemListener(this);
+		
+		thSelect = new java.awt.Choice();
+		thSelect.add("H");
+		thSelect.add("S");
+		thSelect.add("B");
+		thSelect.select("B");
+		
+		thButton = new Button();
+		thButton.setLabel("Apply");
+		thButton.setActionCommand("Apply");
+		thButton.addActionListener(this);
+		
+		//thSlider = new JSlider();
+		//thSlider.setMinimum(0);
+		//thSlider.setMaximum(255);
+		//thSlider.setOrientation(0);
+		thValue = new java.awt.TextField();
+		thValue.setText("128");
 
 		okButton = new Button();
 		okButton.setLabel("OK");
@@ -52,12 +67,14 @@ public class PointAnalysisInteractiveMenuStrip extends Panel implements ActionLi
 		clearButton.setActionCommand("Clear");
 		clearButton.addActionListener(this);
 
-		//this.add(infoLabel);
 		this.add(countLabel);
 		this.add(colorSelect);
 		this.add(okButton);
 		this.add(cancelButton);
 		this.add(clearButton);
+		this.add(thValue);
+		this.add(thSelect);
+		this.add(thButton);
 		
 		interactionHandler = new PointAnalysisInteractiveHandler(pointsX, pointsY, overlayColor, numDomains, randomizePoints,
 				markLenPx, image, restable, this);
@@ -71,7 +88,28 @@ public class PointAnalysisInteractiveMenuStrip extends Panel implements ActionLi
 			remove();
 		} else if (s == "Clear") {
 			clear();
+		} else if (s == "Apply") {
+			applyTh();
 		}
+	}
+
+	private void applyTh() {
+		int mode = 2;
+		
+		if (thSelect.getSelectedItem() == "H")
+			mode=0;
+		else if (thSelect.getSelectedItem() == "S")
+			mode=1;
+		else if (thSelect.getSelectedItem() == "B")
+			mode=2;
+		int th;
+		try {
+			th = Integer.parseInt(thValue.getText());
+		} catch (Exception e) {
+			th = 0;
+		}
+		
+		interactionHandler.applyThreshold(mode, th);		
 	}
 
 	public void updateCounter(Integer[] count) {
@@ -109,8 +147,10 @@ public class PointAnalysisInteractiveMenuStrip extends Panel implements ActionLi
 	public void itemStateChanged(ItemEvent e) {
 		if (e.getStateChange() != ItemEvent.SELECTED)
 			return;
-		
-		interactionHandler.setColor((String) e.getItem());
-		interactionHandler.drawOverlay();
+		String s = (String) e.getItem();
+		if (e.getSource() == colorSelect) {
+			interactionHandler.setColor(s);
+			interactionHandler.drawOverlay();
+		}
 	}
 }
