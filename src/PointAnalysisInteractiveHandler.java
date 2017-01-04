@@ -99,9 +99,9 @@ public class PointAnalysisInteractiveHandler {
 			n = px.intValue()  * py.intValue();
 			points = new ArrayList<Point>(n);
 			
-			for (double ix=ox; ix <= sx-ox; ix+=dx) {
-				for (double iy=oy; iy <= sy-oy; iy+=dy) {
-					Point p = new Point(Tools.getRoundedInt(ix),Tools.getRoundedInt(iy));
+			for (int ix=0; ix < px; ix++) {
+				for (int iy=0; iy < py; iy++) {
+					Point p = new Point(Tools.getRoundedInt(ox + (ix * dx)),Tools.getRoundedInt(oy + (iy * dy)));
 					points.add(p);
 					markList.put(p, 0);
 				}
