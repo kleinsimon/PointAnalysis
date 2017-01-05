@@ -6,6 +6,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.gui.ImageCanvas;
 import ij.gui.ImageRoi;
 import ij.gui.Overlay;
@@ -29,21 +30,22 @@ public class PointAnalysisInteractiveHandler {
 	Overlay ovl;
 	private Color ovlColor;
 
-	public PointAnalysisInteractiveHandler(int pointsX, int pointsY, String overlayColor, int numDom, Boolean randomizePoints,
-			int markLenPx, ImagePlus image, ResultsTable restable,
+	public PointAnalysisInteractiveHandler(ImagePlus image, ResultsTable restable,
 			PointAnalysisInteractiveMenuStrip parentStrip) {
-		px = pointsX;
-		py = pointsY;
 		
-		nd = numDom;
-		markLengthPx = markLenPx;
+		px = ((Double) Prefs.get("PointAnalysisInteractive.pointsX", 20)).intValue();
+		py = ((Double) Prefs.get("PointAnalysisInteractive.pointsY", 20)).intValue();
+		nd = ((Double) Prefs.get("PointAnalysisInteractive.numDomains", 2)).intValue();
+		randomize = Prefs.get("PointAnalysisInteractive.randomizePoints", false);
+		
+		markLengthPx = ((Double) Prefs.get("PointAnalysisInteractive.markLength", 5)).intValue();;
 		iplus = image;
 		ip = iplus.getProcessor();
 		icanv = iplus.getCanvas();
 		rt = restable;
 		menuStrip = parentStrip;
-		randomize = randomizePoints;
-		setColor(overlayColor);
+
+		setColor(Prefs.get("PointAnalysisInteractive.overlayColor", "Red"));
 		
 		sx = iplus.getWidth();
 		sy = iplus.getHeight();
@@ -194,15 +196,16 @@ public class PointAnalysisInteractiveHandler {
 		//Point cursorPos = getRealPos();
 		
 
-		int l = markLengthPx / 2;
+		int l = markLengthPx;
 
 		Enumeration<Point> e = markList.keys();
 		while (e.hasMoreElements()) {
 			Point p = e.nextElement();
 			Integer dom = markList.get(p)+1;
-			overlay.drawLine(p.x, p.y-l, p.x, p.y+l);
-			overlay.drawLine(p.x-l, p.y, p.x+l, p.y);	
-			overlay.drawString(dom.toString(), p.x+l, p.y, Color.BLACK);
+			//overlay.drawLine(p.x, p.y-l, p.x, p.y+l);
+			//overlay.drawLine(p.x-l, p.y, p.x+l, p.y);	
+			//overlay.drawString(dom.toString(), p.x+l, p.y);
+			drawMark(dom, overlay, p, l);
 		}
 		
 		
@@ -216,6 +219,36 @@ public class PointAnalysisInteractiveHandler {
 		// iplus.setRoi(roi);
 		// icanv.setCursor(Cursor.CURSOR_NONE);
 		iplus.draw();
+	}
+	
+	public void drawMark(Integer n, ImageProcessor overlay, Point p, int l) {
+		int l2 = l/2;
+		int cx = p.x - l2;
+		int cy = p.y - l2; 
+		
+		switch (n) {
+		case 1:
+			//Cross
+			overlay.drawLine(cx, p.y, cx+l, p.y);
+			overlay.drawLine(p.x, cy, p.x, cy+l);	
+			break;
+		case 2:
+			//Circle
+			overlay.drawOval(cx, cy, l, l);
+			overlay.drawDot(p.x, p.y);
+			break;
+		case 3:
+			//X
+			overlay.drawLine(cx, cy, cx+l, cy+l);
+			overlay.drawLine(cx, cy+l, cx+l, cy);	
+			break;
+		default:
+			//Square
+			overlay.drawRect(cx, cy, l+1, l+1);
+			overlay.drawDot(p.x, p.y);
+			break;
+		}
+		overlay.drawString(n.toString(), p.x+l, p.y);
 	}
 	
 	public void applyThreshold(int mode, int threshold) {

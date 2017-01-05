@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.gui.YesNoCancelDialog;
 import ij.measure.ResultsTable;
 
@@ -19,11 +20,8 @@ public class PointAnalysisInteractiveMenuStrip extends Panel implements ActionLi
 	public PointAnalysisInteractiveHandler interactionHandler;
 	private String[] colorList = {"Red","Green","Blue","Yellow","Orange","Purple","Black","White"};
 
-	public PointAnalysisInteractiveMenuStrip(int pointsX, int pointsY, String overlayColor, int numDomains, Boolean randomizePoints, 
-			int markLenPx, ImagePlus image, ResultsTable restable) {
-
-		//infoLabel = new Label();
-		//infoLabel.setText("Left: Toggle. Right: Reverse Toggle.");
+	public PointAnalysisInteractiveMenuStrip(ImagePlus image, ResultsTable restable) {
+		String overlayColor = Prefs.get("PointAnalysisInteractive.overlayColor", "Red");
 
 		countLabel = new Label();
 		countLabel.setText("");
@@ -76,8 +74,7 @@ public class PointAnalysisInteractiveMenuStrip extends Panel implements ActionLi
 		this.add(thSelect);
 		this.add(thButton);
 		
-		interactionHandler = new PointAnalysisInteractiveHandler(pointsX, pointsY, overlayColor, numDomains, randomizePoints,
-				markLenPx, image, restable, this);
+		interactionHandler = new PointAnalysisInteractiveHandler(image, restable, this);
 	}
 
 	public void actionPerformed(ActionEvent e) {

@@ -16,12 +16,6 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 
 public class PointAnalysisInteractive implements PlugInFilter {
-	private Double pointsX = 20.d;
-	private Double pointsY = 20.d;
-	private Double numDomains = 2.0;
-	private String overlayColor;
-	private int markLength = 5;
-	private boolean randomizePoints;
 	private ResultsTable rt = new ResultsTable();
 	private String[] colorList = {"Red","Green","Blue","Yellow","Orange","Purple","Black","White"};
 
@@ -32,10 +26,12 @@ public class PointAnalysisInteractive implements PlugInFilter {
 	}
 
 	boolean showDialog() {
+		Double pointsX, pointsY = 20.d, numDomains = 2.0;
+		String overlayColor;
+		boolean randomizePoints;
+		
 		pointsX = Prefs.get("PointAnalysisInteractive.pointsX", 20);
 		pointsY = Prefs.get("PointAnalysisInteractive.pointsY", 20);
-		//offsetX = Prefs.get("PointAnalysisInteractive.offsetX", 20);
-		//offsetY = Prefs.get("PointAnalysisInteractive.offsetY", 20);
 		numDomains = Prefs.get("PointAnalysisInteractive.numDomains", 2);
 		randomizePoints = Prefs.get("PointAnalysisInteractive.randomizePoints", false);
 		overlayColor = Prefs.get("PointAnalysisInteractive.overlayColor", "Red");
@@ -45,8 +41,6 @@ public class PointAnalysisInteractive implements PlugInFilter {
 		gd.addMessage("This plug-in allows the interactive assignment of points to a given number of domains.");
 		gd.addNumericField("Number of points X / Total number of points if randomized", pointsX, 0);
 		gd.addNumericField("Number of points Y", pointsY, 0);
-		//gd.addNumericField("Left offset in pixels/units", offsetX, 1);
-		//gd.addNumericField("Top offset in pixels/units", offsetY, 1);
 		gd.addNumericField("Number of domains", numDomains, 0);
 		gd.addCheckbox("Randomize Points", randomizePoints);
 		gd.addChoice("Overlay color", colorList, "Red");
@@ -57,8 +51,6 @@ public class PointAnalysisInteractive implements PlugInFilter {
 
 		pointsX = Math.max(gd.getNextNumber(), 1d);
 		pointsY = Math.max(gd.getNextNumber(), 1d);
-		//offsetX = Math.max(gd.getNextNumber(), 1d);
-		//offsetY = Math.max(gd.getNextNumber(), 1d);
 		numDomains = Math.max(gd.getNextNumber(), 2d);
 		randomizePoints = gd.getNextBoolean();
 		overlayColor = gd.getNextChoice();
@@ -66,11 +58,10 @@ public class PointAnalysisInteractive implements PlugInFilter {
 		
 		Prefs.set("PointAnalysisInteractive.pointsX", pointsX);
 		Prefs.set("PointAnalysisInteractive.pointsY", pointsY);
-		//Prefs.set("PointAnalysisInteractive.offsetX", offsetX);
-		//Prefs.set("PointAnalysisInteractive.offsetY", offsetY);
 		Prefs.set("PointAnalysisInteractive.numDomains", numDomains);
 		Prefs.set("PointAnalysisInteractive.randomizePoints", randomizePoints);
 		Prefs.set("PointAnalysisInteractive.overlayColor", overlayColor);
+		Prefs.set("PointAnalysisInteractive.markLength", 6.0);
 
 		Prefs.savePreferences();
 		return true;
@@ -92,12 +83,8 @@ public class PointAnalysisInteractive implements PlugInFilter {
 			}
 		}
 
-		int px = pointsX.intValue();
-		int py = pointsY.intValue();
-		int nd = numDomains.intValue();
 
-		PointAnalysisInteractiveMenuStrip menuStrip = new PointAnalysisInteractiveMenuStrip(px, py, overlayColor, nd, randomizePoints, 
-				markLength, iplus, rt);
+		PointAnalysisInteractiveMenuStrip menuStrip = new PointAnalysisInteractiveMenuStrip(iplus, rt);
 		iplus.getWindow().add(menuStrip);
 		menuStrip.interactionHandler.updateSize();
 	}
