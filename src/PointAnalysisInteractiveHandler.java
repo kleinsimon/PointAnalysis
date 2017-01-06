@@ -20,14 +20,12 @@ public class PointAnalysisInteractiveHandler {
 	private Hashtable<Point, Integer> markList = new Hashtable<Point, Integer>();
 	private ImagePlus iplus = null;
 	private ImageCanvas icanv = null;
-	private Integer numMarks = 0;
 	private ArrayList<Point> points;
 	private PointAnalysisInteractiveMenuStrip menuStrip;
 	ImageProcessor ip = null;
 	public PointAnalysisInteractiveMouseHandler mouseActionListener;
 	private ResultsTable rt;
 	private Boolean randomize;
-	Overlay ovl;
 	private Color ovlColor;
 
 	public PointAnalysisInteractiveHandler(ImagePlus image, ResultsTable restable,
@@ -38,7 +36,7 @@ public class PointAnalysisInteractiveHandler {
 		nd = ((Double) Prefs.get("PointAnalysisInteractive.numDomains", 2)).intValue();
 		randomize = Prefs.get("PointAnalysisInteractive.randomizePoints", false);
 		
-		markLengthPx = ((Double) Prefs.get("PointAnalysisInteractive.markLength", 5)).intValue();;
+		markLengthPx = ((Double) Prefs.get("PointAnalysisInteractive.markLength", 5)).intValue();
 		iplus = image;
 		ip = iplus.getProcessor();
 		icanv = iplus.getCanvas();
@@ -145,7 +143,7 @@ public class PointAnalysisInteractiveHandler {
 		rt.setValue("Image", row, iplus.getTitle());
 
 		for (int ri = 0; ri < nd; ri++) {
-			String cName = String.format("Domain %d", ri);
+			String cName = String.format("Domain %d", ri+1);
 			rt.setValue(cName, row, domains[ri]);
 		}
 
@@ -169,7 +167,7 @@ public class PointAnalysisInteractiveHandler {
 		iplus.updateAndDraw();
 	}
 
-	public void togglePoint(Boolean rev) {
+	public void togglePoint(boolean rev) {
 		Point cursorPos = getRealPos();
 		Point p = getNextPoint(cursorPos);
 
@@ -178,23 +176,34 @@ public class PointAnalysisInteractiveHandler {
 		} 
 		else {
 			int olddom = markList.get(p);
-			if (olddom == nd-1)
-				markList.put(p, 0);
-			else
-				markList.put(p, olddom+1);
+				markList.put(p, circleDom(olddom, rev));
+			
 		}
 		drawOverlay();
-		numMarks++;
 		menuStrip.updateCounter(getMarkCounts());
+	}
+	
+	private int circleDom(int olddom, boolean rev) {
+		int min = 0;
+		int max = nd-1;
+		
+		if (!rev) {
+			if (olddom == max) 
+				return min;
+			else
+				return olddom+1;
+		} else {
+			if (olddom == min)
+				return max;
+			else
+				return olddom-1;
+		}
 	}
 
 	public void drawOverlay() {
 		ImageProcessor overlay = new ColorProcessor(ip.getWidth(), ip.getHeight());
-		
-		overlay.setColor(ovlColor);
 
-		//Point cursorPos = getRealPos();
-		
+		overlay.setColor(ovlColor);
 
 		int l = markLengthPx;
 
@@ -202,12 +211,8 @@ public class PointAnalysisInteractiveHandler {
 		while (e.hasMoreElements()) {
 			Point p = e.nextElement();
 			Integer dom = markList.get(p)+1;
-			//overlay.drawLine(p.x, p.y-l, p.x, p.y+l);
-			//overlay.drawLine(p.x-l, p.y, p.x+l, p.y);	
-			//overlay.drawString(dom.toString(), p.x+l, p.y);
 			drawMark(dom, overlay, p, l);
 		}
-		
 		
 		ImageRoi roi = new ImageRoi(0, 0, overlay);
 		//roi.setName(iplus.getShortTitle() + " measured stripes");
@@ -215,8 +220,11 @@ public class PointAnalysisInteractiveHandler {
 		roi.setZeroTransparent(true);
 
 		//ovl = new Overlay(roi);
-		iplus.setOverlay(roi, Color.red, 0, Color.red);
-		// iplus.setRoi(roi);
+
+
+		//icanv.setOverlay(ovl);
+		//iplus.setOverlay(roi, Color.red, 0, Color.red);
+		iplus.setRoi(roi);
 		// icanv.setCursor(Cursor.CURSOR_NONE);
 		iplus.draw();
 	}
@@ -240,6 +248,16 @@ public class PointAnalysisInteractiveHandler {
 		case 3:
 			//X
 			overlay.drawLine(cx, cy, cx+l, cy+l);
+			overlay.drawLine(cx, cy+l, cx+l, cy);	
+			break;
+		case 4:
+			//Cross 1
+			overlay.drawLine(cx, cy, cx+l, cy+l);
+			overlay.drawLine(p.x, cy, p.x, cy+l);	
+			break;
+		case 5:
+			//Cross 2
+			overlay.drawLine(cx, p.y, cx+l, p.y);
 			overlay.drawLine(cx, cy+l, cx+l, cy);	
 			break;
 		default:

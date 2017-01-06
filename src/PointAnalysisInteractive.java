@@ -17,7 +17,6 @@ import ij.process.ImageProcessor;
 
 public class PointAnalysisInteractive implements PlugInFilter {
 	private ResultsTable rt = new ResultsTable();
-	private String[] colorList = {"Red","Green","Blue","Yellow","Orange","Purple","Black","White"};
 
 	public int setup(String arg, ImagePlus imp) {
 		if (imp != null && !showDialog())
@@ -29,7 +28,7 @@ public class PointAnalysisInteractive implements PlugInFilter {
 		Double pointsX, pointsY = 20.d, numDomains = 2.0;
 		String overlayColor;
 		boolean randomizePoints;
-		
+
 		pointsX = Prefs.get("PointAnalysisInteractive.pointsX", 20);
 		pointsY = Prefs.get("PointAnalysisInteractive.pointsY", 20);
 		numDomains = Prefs.get("PointAnalysisInteractive.numDomains", 2);
@@ -43,7 +42,7 @@ public class PointAnalysisInteractive implements PlugInFilter {
 		gd.addNumericField("Number of points Y", pointsY, 0);
 		gd.addNumericField("Number of domains", numDomains, 0);
 		gd.addCheckbox("Randomize Points", randomizePoints);
-		gd.addChoice("Overlay color", colorList, "Red");
+		gd.addChoice("Overlay color", ij.plugin.Colors.colors, "Red");
 
 		gd.showDialog();
 		if (gd.wasCanceled())

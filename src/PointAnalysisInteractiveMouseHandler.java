@@ -10,7 +10,7 @@ public class PointAnalysisInteractiveMouseHandler implements MouseMotionListener
 	}
 
 	public void mouseMoved(MouseEvent e) {
-		parent.drawOverlay();
+		//parent.drawOverlay();
 	}
 
 	public void mouseClicked(MouseEvent e) {
@@ -18,7 +18,13 @@ public class PointAnalysisInteractiveMouseHandler implements MouseMotionListener
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		
+		if (e.getButton() == MouseEvent.BUTTON1) {
+			parent.togglePoint(false);
+			e.consume();
+		} else if(e.getButton() == MouseEvent.BUTTON3) {
+			parent.togglePoint(true);
+			e.consume();
+		}
 	}
 
 	public void mouseEntered(MouseEvent e) {
@@ -26,7 +32,7 @@ public class PointAnalysisInteractiveMouseHandler implements MouseMotionListener
 	}
 
 	public void mouseExited(MouseEvent e) {
-		parent.drawOverlay();
+		//parent.drawOverlay();
 	}
 
 	public void mouseDragged(MouseEvent e) {
@@ -34,6 +40,6 @@ public class PointAnalysisInteractiveMouseHandler implements MouseMotionListener
 	}
 
 	public void mousePressed(MouseEvent e) {
-		parent.togglePoint(e.getButton() != MouseEvent.BUTTON1);
+
 	}
 }

@@ -18,16 +18,14 @@ public class PointAnalysisInteractiveMenuStrip extends Panel implements ActionLi
 	private java.awt.TextField thValue;
 	//private JSlider thSlider;
 	public PointAnalysisInteractiveHandler interactionHandler;
-	private String[] colorList = {"Red","Green","Blue","Yellow","Orange","Purple","Black","White"};
 
 	public PointAnalysisInteractiveMenuStrip(ImagePlus image, ResultsTable restable) {
 		String overlayColor = Prefs.get("PointAnalysisInteractive.overlayColor", "Red");
-
+		
 		countLabel = new Label();
 		countLabel.setText("");
-		
 		colorSelect = new java.awt.Choice();
-		for (String c : colorList)
+		for (String c : ij.plugin.Colors.colors)
 			colorSelect.add(c);
 		colorSelect.select(overlayColor);
 		colorSelect.addItemListener(this);
