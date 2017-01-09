@@ -1,3 +1,4 @@
+**DEPRECATED merged into https://github.com/kleinsimon/MicroStructureToolBox **
 # PointAnalysis
 Plugin for ImageJ to measure domains (e.g. phases) in images using a grid of points.
 
